@@ -36,7 +36,7 @@ public class ProcessUtil {
             } catch (Exception ex) {
                 logger.error("get process id for windows error {0}", ex);
             }
-        } else if (Platform.isLinux() || Platform.isAIX() || Platform.isMac()) {
+        } else if (Platform.isLinux() || Platform.isAIX()) {
             try {
                 Class<?> clazz = Class.forName("java.lang.UNIXProcess");
                 field = clazz.getDeclaredField("pid");
@@ -64,10 +64,9 @@ public class ProcessUtil {
         boolean result;
         if (Platform.isWindows()) {
             command = "cmd.exe /c taskkill /PID " + pid + " /F /T ";
-        } else if (Platform.isLinux() || Platform.isAIX() || Platform.isMac()) {
+        } else if (Platform.isLinux() || Platform.isAIX()) {
             command = "kill " + pid;
         }
-        JobLogger.log("Kill job command: {}",command);
         try {
             //杀掉进程
             process = Runtime.getRuntime().exec(command);

@@ -3,7 +3,7 @@ package com.wugui.datax.admin.entity;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
-import com.wugui.datatx.core.enums.DbType;
+import com.wugui.datax.admin.core.handler.AESEncryptHandler;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -38,20 +38,44 @@ public class JobDatasource extends Model<JobDatasource> {
     private String datasourceName;
 
     /**
+     * 数据源
+     */
+    @ApiModelProperty(value = "数据源")
+    private String datasource;
+
+    /**
      * 数据源分组
      */
     @ApiModelProperty(value = "数据源分组")
     private String datasourceGroup;
 
-
-    @ApiModelProperty(value = "连接参数")
-    private String connectionParams;
+    /**
+     * 用户名
+     * AESEncryptHandler 加密类
+     * MyBatis Plus 3.0.7.1之前版本没有typeHandler属性，需要升级到最低3.1.2
+     */
+    @ApiModelProperty(value = "用户名")
+    @TableField(typeHandler = AESEncryptHandler.class)
+    private String jdbcUsername;
 
     /**
-     * 状态：0删除 1启用 2禁用
+     * 密码
      */
-    @ApiModelProperty(value = "数据源类型")
-    private DbType type;
+    @TableField(typeHandler = AESEncryptHandler.class)
+    @ApiModelProperty(value = "密码")
+    private String jdbcPassword;
+
+    /**
+     * jdbc url
+     */
+    @ApiModelProperty(value = "jdbc url")
+    private String jdbcUrl;
+
+    /**
+     * jdbc驱动类
+     */
+    @ApiModelProperty(value = "jdbc驱动类")
+    private String jdbcDriverClass;
 
     /**
      * 状态：0删除 1启用 2禁用
@@ -96,6 +120,17 @@ public class JobDatasource extends Model<JobDatasource> {
     @ApiModelProperty(value = "备注", hidden = true)
     private String comments;
 
+    /**
+     * zookeeper地址
+     */
+    @ApiModelProperty(value = "zookeeper地址", hidden = true)
+    private String zkAdress;
+
+    /**
+     * 数据库名
+     */
+    @ApiModelProperty(value = "数据库名", hidden = true)
+    private String databaseName;
     /**
      * 获取主键值
      *

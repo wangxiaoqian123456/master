@@ -1,6 +1,6 @@
 package com.wugui.datax.admin.tool.meta;
 
-public class ClickHouseDataBaseMeta extends BaseDatabaseMeta {
+public class ClickHouseDataBaseMeta extends BaseDatabaseMeta implements DatabaseInterface {
     private volatile static ClickHouseDataBaseMeta single;
     public static ClickHouseDataBaseMeta getInstance() {
         if (single == null) {

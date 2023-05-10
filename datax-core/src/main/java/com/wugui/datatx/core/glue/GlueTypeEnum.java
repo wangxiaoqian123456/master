@@ -1,12 +1,11 @@
 package com.wugui.datatx.core.glue;
 
 /**
- * @author  xuxueli on 17/4/26.
+ * Created by xuxueli on 17/4/26.
  */
 public enum GlueTypeEnum {
 
-    JAVA_BEAN("JAVA_BEAN", false, null, null),
-    DATAX("DATAX", false, null, null),
+    BEAN("BEAN", false, null, null),
     GLUE_GROOVY("GLUE(Java)", false, null, null),
     GLUE_SHELL("GLUE(Shell)", true, "bash", ".sh"),
     GLUE_PYTHON("GLUE(Python)", true, "python", ".py"),

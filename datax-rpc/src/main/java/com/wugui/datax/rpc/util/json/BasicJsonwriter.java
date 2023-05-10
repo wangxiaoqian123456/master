@@ -22,7 +22,7 @@ public class BasicJsonwriter {
     private static final String STR_ARRAY_LEFT = "[";
     private static final String STR_ARRAY_RIGHT = "]";
 
-    private static final Map<String, Field[]> CACHE_FIELDS = new HashMap<>();
+    private static final Map<String, Field[]> cacheFields = new HashMap<>();
 
     /**
      * write object to json
@@ -61,16 +61,27 @@ public class BasicJsonwriter {
      */
     private void writeObjItem(String key, Object value, StringBuilder json) {
 
+        /*if ("serialVersionUID".equals(key)
+                || value instanceof Logger) {
+            // pass
+
+            return;
+        }*/
+
+        // "key:"
         if (key != null) {
             json.append(STR_SLASH).append(key).append(STR_SLASH_STR);
         }
 
+        // val
         if (value == null) {
             json.append("null");
         } else if (value instanceof String
                 || value instanceof Byte
                 || value instanceof CharSequence) {
-            json.append(STR_SLASH).append(value.toString().replaceAll("\"", "\\\\\"")).append(STR_SLASH);
+            // string
+
+            json.append(STR_SLASH).append(value.toString()).append(STR_SLASH);
         } else if (value instanceof Boolean
                 || value instanceof Short
                 || value instanceof Integer
@@ -78,8 +89,11 @@ public class BasicJsonwriter {
                 || value instanceof Float
                 || value instanceof Double
         ) {
+            // number
+
             json.append(value);
         } else if (value instanceof Object[] || value instanceof Collection) {
+            // collection | array     //  Array.getLength(array);   // Array.get(array, i);
 
             Collection valueColl = null;
             if (value instanceof Object[]) {
@@ -136,16 +150,16 @@ public class BasicJsonwriter {
 
     public synchronized Field[] getDeclaredFields(Class<?> clazz) {
         String cacheKey = clazz.getName();
-        if (CACHE_FIELDS.containsKey(cacheKey)) {
-            return CACHE_FIELDS.get(cacheKey);
+        if (cacheFields.containsKey(cacheKey)) {
+            return cacheFields.get(cacheKey);
         }
-        Field[] fields = getAllDeclaredFields(clazz);
-        CACHE_FIELDS.put(cacheKey, fields);
+        Field[] fields = getAllDeclaredFields(clazz);    //clazz.getDeclaredFields();
+        cacheFields.put(cacheKey, fields);
         return fields;
     }
 
     private Field[] getAllDeclaredFields(Class<?> clazz) {
-        List<Field> list = new ArrayList<>();
+        List<Field> list = new ArrayList<Field>();
         Class<?> current = clazz;
 
         while (current != null && current != Object.class) {

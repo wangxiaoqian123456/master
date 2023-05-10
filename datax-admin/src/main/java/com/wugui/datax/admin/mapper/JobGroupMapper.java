@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
- * @author  xuxueli on 16/9/30.
+ * Created by xuxueli on 16/9/30.
  */
 @Mapper
 public interface JobGroupMapper {

@@ -18,29 +18,29 @@ import java.util.Map;
  */
 public class DateUtil {
 
+    // ---------------------- format parse ----------------------
     private static Logger logger = LoggerFactory.getLogger(DateUtil.class);
 
     private static final String DATE_FORMAT = "yyyy-MM-dd";
     private static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-    private static final ThreadLocal<Map<String, DateFormat>> DATE_FORMAT_THREAD_LOCAL = new ThreadLocal<>();
-
+    private static final ThreadLocal<Map<String, DateFormat>> dateFormatThreadLocal = new ThreadLocal<Map<String, DateFormat>>();
     private static DateFormat getDateFormat(String pattern) {
-        if (pattern == null || pattern.trim().length() == 0) {
+        if (pattern==null || pattern.trim().length()==0) {
             throw new IllegalArgumentException("pattern cannot be empty.");
         }
 
-        Map<String, DateFormat> dateFormatMap = DATE_FORMAT_THREAD_LOCAL.get();
-        if (dateFormatMap != null && dateFormatMap.containsKey(pattern)) {
+        Map<String, DateFormat> dateFormatMap = dateFormatThreadLocal.get();
+        if(dateFormatMap!=null && dateFormatMap.containsKey(pattern)){
             return dateFormatMap.get(pattern);
         }
 
-        synchronized (DATE_FORMAT_THREAD_LOCAL) {
+        synchronized (dateFormatThreadLocal) {
             if (dateFormatMap == null) {
                 dateFormatMap = new HashMap<>();
             }
             dateFormatMap.put(pattern, new SimpleDateFormat(pattern));
-            DATE_FORMAT_THREAD_LOCAL.set(dateFormatMap);
+            dateFormatThreadLocal.set(dateFormatMap);
         }
 
         return dateFormatMap.get(pattern);
@@ -87,7 +87,7 @@ public class DateUtil {
      * @return
      * @throws ParseException
      */
-    public static Date parseDate(String dateString) {
+    public static Date parseDate(String dateString){
         return parse(dateString, DATE_FORMAT);
     }
 
@@ -120,6 +120,8 @@ public class DateUtil {
         }
     }
 
+
+    // ---------------------- add date ----------------------
 
     public static Date addYears(final Date date, final int amount) {
         return add(date, Calendar.YEAR, amount);

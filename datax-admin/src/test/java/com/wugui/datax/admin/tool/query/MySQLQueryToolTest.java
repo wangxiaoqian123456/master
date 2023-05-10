@@ -1,6 +1,5 @@
 package com.wugui.datax.admin.tool.query;
 
-import com.wugui.datatx.core.enums.DbType;
 import com.wugui.datax.admin.entity.JobDatasource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -9,25 +8,25 @@ import org.junit.Test;
 import java.sql.SQLException;
 import java.util.List;
 
-import static com.wugui.datax.admin.tool.query.DriverConnectionFactory.buildParameter;
-
 @Slf4j
 public class MySQLQueryToolTest {
 
     private BaseQueryTool queryTool;
-    private JobDatasource jobDatasource;
+    private JobDatasource jdbcDatasource;
 
     @Before
     public void before() {
         genMysqlDemo();
-        queryTool = QueryToolFactory.getByDbType(jobDatasource.getType(), jobDatasource.getConnectionParams());
+        queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
     }
 
     private void genMysqlDemo() {
-        jobDatasource = new JobDatasource();
-        jobDatasource.setDatasourceName("z01_mysql_3306");
-        String parameter = buildParameter("root", "root", DbType.MYSQL, null, "jdbc:mysql://localhost:3306/datax_web?serverTimezone=Asia/Shanghai&useLegacyDatetimeCode=false&useSSL=false&nullNamePatternMatchesAll=true&useUnicode=true&characterEncoding=UTF-8", null, null);
-        jobDatasource.setConnectionParams(parameter);
+        jdbcDatasource = new JobDatasource();
+        jdbcDatasource.setDatasourceName("z01_mysql_3306");
+        jdbcDatasource.setJdbcUsername("root");
+        jdbcDatasource.setJdbcPassword("root");
+        jdbcDatasource.setJdbcUrl("jdbc:mysql://localhost:3306/datax_web?serverTimezone=Asia/Shanghai&useLegacyDatetimeCode=false&useSSL=false&nullNamePatternMatchesAll=true&useUnicode=true&characterEncoding=UTF-8");
+        jdbcDatasource.setJdbcDriverClass("com.mysql.jdbc.Driver");
     }
 
     @Test
@@ -38,9 +37,9 @@ public class MySQLQueryToolTest {
 
     @Test
     public void getColumnNames() {
-        List<String> columns = queryTool.getColumnNames("job_config", null, jobDatasource.getType());
+        List<String> columns = queryTool.getColumnNames("job_config",jdbcDatasource.getJdbcDriverClass());
         log.info(columns.toString());
-        columns = queryTool.getColumnNames("job_log", null, jobDatasource.getType());
+        columns = queryTool.getColumnNames("job_log",jdbcDatasource.getJdbcDriverClass());
         log.info(columns.toString());
     }
 

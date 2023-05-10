@@ -1,6 +1,6 @@
 package com.wugui.datax.admin.service;
 
-import com.wugui.datax.admin.dto.DataXJsonBuildDTO;
+import com.wugui.datax.admin.dto.DataXJsonBuildDto;
 
 /**
  * com.wugui.datax json构建服务层接口
@@ -17,5 +17,5 @@ public interface DataxJsonService {
      * @param dto
      * @return
      */
-    String buildJobJson(DataXJsonBuildDTO dto);
+    String buildJobJson(DataXJsonBuildDto dto);
 }

@@ -3,7 +3,7 @@ package com.wugui.datatx.core.biz.model;
 import java.io.Serializable;
 
 /**
- * @author  jingwk on 2019/12/14.
+ * Created by jingwk on 2019/12/14.
  */
 public class HandleProcessCallbackParam implements Serializable {
     private static final long serialVersionUID = 42L;

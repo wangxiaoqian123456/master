@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
- * @author  xuxueli on 17/5/10.
+ * Created by xuxueli on 17/5/10.
  */
 @RestController
 @RequestMapping("/api")

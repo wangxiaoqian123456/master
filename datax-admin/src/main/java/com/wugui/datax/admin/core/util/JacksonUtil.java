@@ -21,9 +21,9 @@ import java.io.IOException;
 public class JacksonUtil {
 	private static Logger logger = LoggerFactory.getLogger(JacksonUtil.class);
 
-    private final static ObjectMapper OBJ_MAPPER = new ObjectMapper();
+    private final static ObjectMapper objectMapper = new ObjectMapper();
     public static ObjectMapper getInstance() {
-        return OBJ_MAPPER;
+        return objectMapper;
     }
 
     /**
