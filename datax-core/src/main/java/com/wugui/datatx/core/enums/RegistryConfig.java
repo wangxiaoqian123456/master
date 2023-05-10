@@ -1,7 +1,7 @@
 package com.wugui.datatx.core.enums;
 
 /**
- * @author  xuxueli on 17/5/10.
+ * Created by xuxueli on 17/5/10.
  */
 public class RegistryConfig {
 

@@ -1,5 +1,7 @@
 package com.wugui.datax.admin.tool.datax.writer;
 
+import java.util.Map;
+
 /**
  * mysql writer构建类
  *
@@ -9,9 +11,14 @@ package com.wugui.datax.admin.tool.datax.writer;
  * @since 2019/7/30 23:08
  */
 public class MysqlWriter extends BaseWriterPlugin implements DataxWriterInterface {
-
     @Override
     public String getName() {
         return "mysqlwriter";
+    }
+
+
+    @Override
+    public Map<String, Object> sample() {
+        return null;
     }
 }

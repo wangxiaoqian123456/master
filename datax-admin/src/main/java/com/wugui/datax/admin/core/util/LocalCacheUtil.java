@@ -10,8 +10,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class LocalCacheUtil {
 
-    // 类型建议用抽象父类，兼容性更好；
-    private static ConcurrentMap<String, LocalCacheData> cacheRepository = new ConcurrentHashMap<>();
+    private static ConcurrentMap<String, LocalCacheData> cacheRepository = new ConcurrentHashMap<String, LocalCacheData>();   // 类型建议用抽象父类，兼容性更好；
     private static class LocalCacheData{
         private String key;
         private Object val;

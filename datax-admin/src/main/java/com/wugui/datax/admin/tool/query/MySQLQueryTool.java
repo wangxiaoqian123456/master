@@ -1,6 +1,8 @@
 package com.wugui.datax.admin.tool.query;
 
-import com.wugui.datatx.core.enums.DbType;
+import com.wugui.datax.admin.entity.JobDatasource;
+
+import java.sql.SQLException;
 
 /**
  * mysql数据库使用的查询工具
@@ -12,8 +14,8 @@ import com.wugui.datatx.core.enums.DbType;
  */
 public class MySQLQueryTool extends BaseQueryTool implements QueryToolInterface {
 
-    public MySQLQueryTool(DbType dbType, String parameter) {
-        super(dbType, parameter);
+    public MySQLQueryTool(JobDatasource jobDatasource) throws SQLException {
+        super(jobDatasource);
     }
 
 }

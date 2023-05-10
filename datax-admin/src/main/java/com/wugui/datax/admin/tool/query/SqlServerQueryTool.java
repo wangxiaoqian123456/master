@@ -1,6 +1,8 @@
 package com.wugui.datax.admin.tool.query;
 
-import com.wugui.datatx.core.enums.DbType;
+import com.wugui.datax.admin.entity.JobDatasource;
+
+import java.sql.SQLException;
 
 /**
  * sql server
@@ -10,7 +12,7 @@ import com.wugui.datatx.core.enums.DbType;
  * @since 2019/8/2
  */
 public class SqlServerQueryTool extends BaseQueryTool implements QueryToolInterface {
-    public SqlServerQueryTool(DbType dbType, String parameter) {
-        super(dbType,parameter);
+    public SqlServerQueryTool(JobDatasource jobDatasource) throws SQLException {
+        super(jobDatasource);
     }
 }

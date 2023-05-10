@@ -3,7 +3,7 @@ package com.wugui.datax.admin.dto;
 import lombok.Data;
 
 /**
- * @author  mac on 2020/3/16.
+ * Created by mac on 2020/3/16.
  */
 @Data
 public class UpsertInfo {

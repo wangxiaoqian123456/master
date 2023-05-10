@@ -8,7 +8,7 @@ package com.wugui.datax.admin.tool.meta;
  * @Version 1.0
  * @since 2019/8/2 15:45
  */
-public class SqlServerDatabaseMeta extends BaseDatabaseMeta{
+public class SqlServerDatabaseMeta extends BaseDatabaseMeta implements DatabaseInterface {
     private volatile static SqlServerDatabaseMeta single;
 
     public static SqlServerDatabaseMeta getInstance() {

@@ -1,6 +1,6 @@
 package com.wugui.datax.rpc.remoting.invoker.route.impl;
 
-import com.wugui.datax.rpc.remoting.invoker.route.AbstractXxlRpcLoadBalance;
+import com.wugui.datax.rpc.remoting.invoker.route.XxlRpcLoadBalance;
 
 import java.util.Random;
 import java.util.TreeSet;
@@ -10,7 +10,7 @@ import java.util.TreeSet;
  *
  * @author xuxueli 2018-12-04
  */
-public class XxlRpcLoadBalanceRandomStrategy extends AbstractXxlRpcLoadBalance {
+public class XxlRpcLoadBalanceRandomStrategy extends XxlRpcLoadBalance {
 
     private Random random = new Random();
 

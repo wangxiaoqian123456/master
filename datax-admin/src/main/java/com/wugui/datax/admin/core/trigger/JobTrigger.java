@@ -1,6 +1,5 @@
 package com.wugui.datax.admin.core.trigger;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.wugui.datatx.core.biz.ExecutorBiz;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datatx.core.biz.model.TriggerParam;
@@ -17,11 +16,10 @@ import com.wugui.datax.admin.entity.JobInfo;
 import com.wugui.datax.admin.entity.JobLog;
 import com.wugui.datax.admin.tool.query.BaseQueryTool;
 import com.wugui.datax.admin.tool.query.QueryToolFactory;
-import com.wugui.datax.admin.util.JsonUtils;
+import com.wugui.datax.admin.util.JSONUtils;
 import com.wugui.datax.rpc.util.IpUtil;
 import com.wugui.datax.rpc.util.ThrowableUtil;
 import org.apache.commons.lang.StringUtils;
-import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +28,7 @@ import java.util.Date;
 
 /**
  * xxl-job trigger
- * @author  xuxueli on 17/7/13.
+ * Created by xuxueli on 17/7/13.
  */
 public class JobTrigger {
     private static Logger logger = LoggerFactory.getLogger(JobTrigger.class);
@@ -52,9 +50,9 @@ public class JobTrigger {
             logger.warn(">>>>>>>>>>>> trigger fail, jobId invalid，jobId={}", jobId);
             return;
         }
-        if (GlueTypeEnum.DATAX.getDesc().equals(jobInfo.getGlueType())) {
+        if (GlueTypeEnum.BEAN.getDesc().equals(jobInfo.getGlueType())) {
             //解密账密
-            String json = JsonUtils.changeJson(jobInfo.getJobJson(), JsonUtils.decrypt);
+            String json = JSONUtils.changeJson(jobInfo.getJobJson(), JSONUtils.decrypt);
             jobInfo.setJobJson(json);
         }
         if (StringUtils.isNotBlank(executorParam)) {
@@ -109,10 +107,9 @@ public class JobTrigger {
 
         TriggerParam triggerParam = new TriggerParam();
 
-        // block strategy
-        ExecutorBlockStrategyEnum blockStrategy = ExecutorBlockStrategyEnum.match(jobInfo.getExecutorBlockStrategy(), ExecutorBlockStrategyEnum.SERIAL_EXECUTION);
-        // route strategy
-        ExecutorRouteStrategyEnum executorRouteStrategyEnum = ExecutorRouteStrategyEnum.match(jobInfo.getExecutorRouteStrategy(), null);
+        // param
+        ExecutorBlockStrategyEnum blockStrategy = ExecutorBlockStrategyEnum.match(jobInfo.getExecutorBlockStrategy(), ExecutorBlockStrategyEnum.SERIAL_EXECUTION);  // block strategy
+        ExecutorRouteStrategyEnum executorRouteStrategyEnum = ExecutorRouteStrategyEnum.match(jobInfo.getExecutorRouteStrategy(), null);    // route strategy
         String shardingParam = (ExecutorRouteStrategyEnum.SHARDING_BROADCAST == executorRouteStrategyEnum) ? String.valueOf(index).concat("/").concat(String.valueOf(total)) : null;
 
         // 1、save log-id
@@ -121,42 +118,47 @@ public class JobTrigger {
         calendar.set(Calendar.MILLISECOND, 0);
         Date triggerTime = calendar.getTime();
         JobLog jobLog = new JobLog();
+        jobLog.setJobGroup(jobInfo.getJobGroup());
         jobLog.setJobId(jobInfo.getId());
         jobLog.setTriggerTime(triggerTime);
-        BeanUtil.copyProperties(jobInfo,jobLog);
+        jobLog.setJobDesc(jobInfo.getJobDesc());
 
         JobAdminConfig.getAdminConfig().getJobLogMapper().save(jobLog);
         logger.debug(">>>>>>>>>>> datax-web trigger start, jobId:{}", jobLog.getId());
 
         // 2、init trigger-param
         triggerParam.setJobId(jobInfo.getId());
+        triggerParam.setExecutorHandler(jobInfo.getExecutorHandler());
+        triggerParam.setExecutorParams(jobInfo.getExecutorParam());
+        triggerParam.setExecutorBlockStrategy(jobInfo.getExecutorBlockStrategy());
+        triggerParam.setExecutorTimeout(jobInfo.getExecutorTimeout());
         triggerParam.setLogId(jobLog.getId());
         triggerParam.setLogDateTime(jobLog.getTriggerTime().getTime());
+        triggerParam.setGlueType(jobInfo.getGlueType());
+        triggerParam.setGlueSource(jobInfo.getGlueSource());
         triggerParam.setGlueUpdatetime(jobInfo.getGlueUpdatetime().getTime());
         triggerParam.setBroadcastIndex(index);
         triggerParam.setBroadcastTotal(total);
-        BeanUtil.copyProperties(jobInfo,triggerParam);
+        triggerParam.setJobJson(jobInfo.getJobJson());
 
         //increment parameter
         Integer incrementType = jobInfo.getIncrementType();
-        triggerParam.setIncrementType(incrementType);
-        if (IncrementTypeEnum.ID.getCode().equals(incrementType)) {
-            long maxId = getMaxId(jobInfo);
-            jobLog.setMaxId(maxId);
-            triggerParam.setEndId(String.valueOf(maxId));
-            triggerParam.setStartId(jobInfo.getIncStartId());
-        } else if (IncrementTypeEnum.TIME.getCode().equals(incrementType)) {
-            triggerParam.setStartTime(jobInfo.getIncStartTime());
-            triggerParam.setTriggerTime(triggerTime);
-            triggerParam.setReplaceParamType(jobInfo.getReplaceParamType());
-        } else if (IncrementTypeEnum.PARTITION.getCode().equals(incrementType)) {
-            triggerParam.setPartitionInfo(jobInfo.getPartitionInfo());
-        } else if (IncrementTypeEnum.MONGODB_ID.getCode().equals(incrementType)) {
-            triggerParam.setStartId(jobInfo.getIncStartId());
-            String endId = new ObjectId(triggerTime).toHexString();
-            triggerParam.setEndId(endId);
+        if (incrementType != null) {
+            triggerParam.setIncrementType(incrementType);
+            if (IncrementTypeEnum.ID.getCode() == incrementType) {
+                long maxId = getMaxId(jobInfo);
+                jobLog.setMaxId(maxId);
+                triggerParam.setEndId(maxId);
+                triggerParam.setStartId(jobInfo.getIncStartId());
+            } else if (IncrementTypeEnum.TIME.getCode() == incrementType) {
+                triggerParam.setStartTime(jobInfo.getIncStartTime());
+                triggerParam.setTriggerTime(triggerTime);
+                triggerParam.setReplaceParamType(jobInfo.getReplaceParamType());
+            } else if (IncrementTypeEnum.PARTITION.getCode() == incrementType) {
+                triggerParam.setPartitionInfo(jobInfo.getPartitionInfo());
+            }
+            triggerParam.setReplaceParam(jobInfo.getReplaceParam());
         }
-        triggerParam.setReplaceParam(jobInfo.getReplaceParam());
         //jvm parameter
         triggerParam.setJvmParam(jobInfo.getJvmParam());
 
@@ -215,12 +217,13 @@ public class JobTrigger {
         jobLog.setTriggerCode(triggerResult.getCode());
         jobLog.setTriggerMsg(triggerMsgSb.toString());
         JobAdminConfig.getAdminConfig().getJobLogMapper().updateTriggerInfo(jobLog);
+
         logger.debug(">>>>>>>>>>> datax-web trigger end, jobId:{}", jobLog.getId());
     }
 
     private static long getMaxId(JobInfo jobInfo) {
         JobDatasource datasource = JobAdminConfig.getAdminConfig().getJobDatasourceMapper().selectById(jobInfo.getDatasourceId());
-        BaseQueryTool qTool = QueryToolFactory.getByDbType(datasource.getType(),datasource.getConnectionParams());
+        BaseQueryTool qTool = QueryToolFactory.getByDbType(datasource);
         return qTool.getMaxIdVal(jobInfo.getReaderTable(), jobInfo.getPrimaryKey());
     }
 

@@ -1,8 +1,9 @@
 package com.wugui.datatx.core.executor.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.wugui.datatx.core.executor.JobExecutor;
 import com.wugui.datatx.core.glue.GlueFactory;
-import com.wugui.datatx.core.handler.AbstractJobHandler;
+import com.wugui.datatx.core.handler.IJobHandler;
 import com.wugui.datatx.core.handler.annotation.JobHandler;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
@@ -54,11 +55,11 @@ public class JobSpringExecutor extends JobExecutor implements ApplicationContext
         // init job handler action
         Map<String, Object> serviceBeanMap = applicationContext.getBeansWithAnnotation(JobHandler.class);
 
-        if (serviceBeanMap != null && serviceBeanMap.size() > 0) {
+        if (CollectionUtil.isNotEmpty(serviceBeanMap)) {
             for (Object serviceBean : serviceBeanMap.values()) {
-                if (serviceBean instanceof AbstractJobHandler) {
+                if (serviceBean instanceof IJobHandler) {
                     String name = serviceBean.getClass().getAnnotation(JobHandler.class).value();
-                    AbstractJobHandler handler = (AbstractJobHandler) serviceBean;
+                    IJobHandler handler = (IJobHandler) serviceBean;
                     if (loadJobHandler(name) != null) {
                         throw new RuntimeException("datax-web jobhandler[" + name + "] naming conflicts.");
                     }

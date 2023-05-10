@@ -28,7 +28,7 @@ import java.util.Map;
 import static com.wugui.datatx.core.util.Constants.SPLIT_COMMA;
 
 /**
- * @author  jingwk on 2019/11/17
+ * Created by jingwk on 2019/11/17
  */
 @Slf4j
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -58,15 +58,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         }
     }
 
-
-    /**
-     * 成功验证后调用的方法,如果验证成功，就生成token并返回
-     * @param request
-     * @param response
-     * @param chain
-     * @param authResult
-     * @throws IOException
-     */
+    // 成功验证后调用的方法
+    // 如果验证成功，就生成token并返回
     @Override
     protected void successfulAuthentication(HttpServletRequest request,
                                             HttpServletResponse response,
@@ -85,7 +78,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String token = JwtTokenUtils.createToken(jwtUser.getId(),jwtUser.getUsername(), role, isRemember);
         response.setHeader("token", JwtTokenUtils.TOKEN_PREFIX + token);
         response.setCharacterEncoding("UTF-8");
-        Map<String, Object> maps = new HashMap<>(2);
+        Map<String, Object> maps = new HashMap<>();
         maps.put("data", JwtTokenUtils.TOKEN_PREFIX + token);
         maps.put("roles", role.split(SPLIT_COMMA));
         response.getWriter().write(JSON.toJSONString(new ReturnT<>(maps)));

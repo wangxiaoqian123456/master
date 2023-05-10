@@ -19,7 +19,7 @@ import java.util.Date;
 import static com.wugui.datatx.core.biz.model.ReturnT.FAIL_CODE;
 
 /**
- * @author  jingwk on 2019/11/17
+ * Created by jingwk on 2019/11/17
  */
 @RestController
 @RequestMapping("/jobcode")

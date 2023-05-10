@@ -1,9 +1,7 @@
 package com.wugui.datax.rpc.remoting.invoker.route.impl;
 
-import com.wugui.datax.rpc.remoting.invoker.route.AbstractXxlRpcLoadBalance;
+import com.wugui.datax.rpc.remoting.invoker.route.XxlRpcLoadBalance;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,32 +12,31 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author xuxueli 2018-12-04
  */
-public class XxlRpcLoadBalanceRoundStrategy extends AbstractXxlRpcLoadBalance {
+public class XxlRpcLoadBalanceRoundStrategy extends XxlRpcLoadBalance {
 
-    private final ConcurrentMap<String, Integer> routeCountEachJob = new ConcurrentHashMap<>();
-    private long cacheValidTime = 0;
-
-    /**
-     * @param serviceKey key
-     * @return int
-     */
-    private Integer count(String serviceKey) {
+    private ConcurrentMap<String, Integer> routeCountEachJob = new ConcurrentHashMap<String, Integer>();
+    private long CACHE_VALID_TIME = 0;
+    private int count(String serviceKey) {
         // cache clear
-        if (System.currentTimeMillis() > cacheValidTime) {
+        if (System.currentTimeMillis() > CACHE_VALID_TIME) {
             routeCountEachJob.clear();
-            cacheValidTime = System.currentTimeMillis() + 24 * 60 * 60 * 1000;
+            CACHE_VALID_TIME = System.currentTimeMillis() + 24*60*60*1000;
         }
+
+        // count++
         Integer count = routeCountEachJob.get(serviceKey);
-        // 初始化时主动Random一次，缓解首次压力
-        count = (count == null || count > 1000000) ? (new Random().nextInt(100)) : ++count;
+        count = (count==null || count>1000000)?(new Random().nextInt(100)):++count;  // 初始化时主动Random一次，缓解首次压力
         routeCountEachJob.put(serviceKey, count);
         return count;
     }
 
     @Override
     public String route(String serviceKey, TreeSet<String> addressSet) {
+        // arr
         String[] addressArr = addressSet.toArray(new String[addressSet.size()]);
-        String finalAddress = addressArr[count(serviceKey) % addressArr.length];
+
+        // round
+        String finalAddress = addressArr[count(serviceKey)%addressArr.length];
         return finalAddress;
     }
 

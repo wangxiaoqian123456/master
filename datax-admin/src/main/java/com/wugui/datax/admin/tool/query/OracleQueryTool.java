@@ -1,6 +1,8 @@
 package com.wugui.datax.admin.tool.query;
 
-import com.wugui.datatx.core.enums.DbType;
+import com.wugui.datax.admin.entity.JobDatasource;
+
+import java.sql.SQLException;
 
 /**
  * Oracle数据库使用的查询工具
@@ -12,7 +14,7 @@ import com.wugui.datatx.core.enums.DbType;
  */
 public class OracleQueryTool extends BaseQueryTool implements QueryToolInterface {
 
-    public OracleQueryTool(DbType dbType, String parameter) {
-        super(dbType, parameter);
+    public OracleQueryTool(JobDatasource jobDatasource) throws SQLException {
+        super(jobDatasource);
     }
 }

@@ -5,9 +5,8 @@ import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
-import com.wugui.datatx.core.datasource.MongoDBDataSource;
-import com.wugui.datatx.core.enums.DbType;
-import com.wugui.datatx.core.util.JSONUtils;
+import com.wugui.datax.admin.core.util.LocalCacheUtil;
+import com.wugui.datax.admin.entity.JobDatasource;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
@@ -17,9 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @author
- */
+
 public class MongoDBQueryTool {
 
 
@@ -27,24 +24,27 @@ public class MongoDBQueryTool {
     private static MongoDatabase collections;
 
 
-    public MongoDBQueryTool(DbType dbType, String parameter) throws IOException {
-        getDataSource(dbType, parameter);
+    public MongoDBQueryTool(JobDatasource jobDatasource) throws IOException {
+        if (LocalCacheUtil.get(jobDatasource.getDatasourceName()) == null) {
+            getDataSource(jobDatasource);
+        } else {
+            connection = (MongoClient) LocalCacheUtil.get(jobDatasource.getDatasourceName());
+            if (connection == null) {
+                LocalCacheUtil.remove(jobDatasource.getDatasourceName());
+                getDataSource(jobDatasource);
+            }
+        }
+        LocalCacheUtil.set(jobDatasource.getDatasourceName(), connection, 4 * 60 * 60 * 1000);
     }
 
-    private void getDataSource(DbType dbType, String parameter) throws IOException {
-
-        MongoDBDataSource mongoDBDataSource = JSONUtils.parseObject(parameter, MongoDBDataSource.class);
-
-        final String user = mongoDBDataSource.getUser();
-        final String password = mongoDBDataSource.getPassword();
-        final String clientURL = mongoDBDataSource.getMongoClientURI();
-        if (StringUtils.isBlank(user) && StringUtils.isBlank(password)) {
-            connection = new MongoClient(new MongoClientURI(clientURL));
+    private void getDataSource(JobDatasource jobDatasource) throws IOException {
+        if (StringUtils.isBlank(jobDatasource.getJdbcUsername()) && StringUtils.isBlank(jobDatasource.getJdbcPassword())) {
+            connection = new MongoClient(new MongoClientURI(jobDatasource.getJdbcUrl()));
         } else {
-            MongoCredential credential = MongoCredential.createCredential(user, mongoDBDataSource.getDatabase(), password.toCharArray());
-            connection = new MongoClient(parseServerAddress(clientURL), Arrays.asList(credential));
+            MongoCredential credential = MongoCredential.createCredential(jobDatasource.getJdbcUsername(), jobDatasource.getDatabaseName(), jobDatasource.getJdbcPassword().toCharArray());
+            connection = new MongoClient(parseServerAddress(jobDatasource.getJdbcUrl()), Arrays.asList(credential));
         }
-        collections = connection.getDatabase(mongoDBDataSource.getDatabase());
+        collections = connection.getDatabase(jobDatasource.getDatabaseName());
     }
 
 
@@ -107,6 +107,12 @@ public class MongoDBQueryTool {
                 String type = v.getClass().getSimpleName();
                 list.add(k + ":" + type);
             }
+      /*if ("Document".equals(type)) {
+        ((Document) v).forEach((k1, v1) -> {
+          String simpleName = v1.getClass().getSimpleName();
+        });
+      } */
+
         });
         return list;
     }

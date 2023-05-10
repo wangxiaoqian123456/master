@@ -1,14 +1,20 @@
 package com.wugui.datax.admin.tool.query;
 
-import com.wugui.datatx.core.enums.DbType;
+import com.wugui.datax.admin.entity.JobDatasource;
+
+import java.sql.SQLException;
 
 /**
  * ClickHouse
  */
 
 public class ClickHouseQueryTool extends BaseQueryTool implements QueryToolInterface {
-
-    public ClickHouseQueryTool(DbType dbType, String parameter) {
-        super(dbType, parameter);
+    /**
+     * 构造方法
+     *
+     * @param jobJdbcDatasource
+     */
+  public ClickHouseQueryTool(JobDatasource jobJdbcDatasource) throws SQLException {
+        super(jobJdbcDatasource);
     }
 }

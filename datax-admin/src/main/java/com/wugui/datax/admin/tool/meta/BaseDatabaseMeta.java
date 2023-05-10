@@ -11,13 +11,8 @@ package com.wugui.datax.admin.tool.meta;
 public abstract class BaseDatabaseMeta implements DatabaseInterface {
 
     @Override
-    public String getSQLQueryFields(String tableSchema, String tableName) {
-        if (tableSchema == null || tableSchema.trim().length() < 1) {
-            tableSchema = "";
-        } else {
-            tableSchema = tableSchema.trim() + ".";
-        }
-        return "SELECT * FROM " + tableSchema + tableName + " where 1=0";
+    public String getSQLQueryFields(String tableName) {
+        return "SELECT * FROM " + tableName + " where 1=0";
     }
 
     @Override
@@ -47,7 +42,7 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
 
     @Override
     public String getMaxId(String tableName, String primaryKey) {
-        return String.format("select max(%s) from %s", primaryKey, tableName);
+        return String.format("select max(%s) from %s",primaryKey,tableName);
     }
 
     @Override

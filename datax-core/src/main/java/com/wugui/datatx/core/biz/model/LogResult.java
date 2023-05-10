@@ -3,7 +3,7 @@ package com.wugui.datatx.core.biz.model;
 import java.io.Serializable;
 
 /**
- * @author  xuxueli on 17/3/23.
+ * Created by xuxueli on 17/3/23.
  */
 public class LogResult implements Serializable {
     private static final long serialVersionUID = 42L;

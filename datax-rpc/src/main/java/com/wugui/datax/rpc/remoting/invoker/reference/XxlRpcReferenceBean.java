@@ -2,23 +2,25 @@ package com.wugui.datax.rpc.remoting.invoker.reference;
 
 import com.wugui.datax.rpc.remoting.invoker.XxlRpcInvokerFactory;
 import com.wugui.datax.rpc.remoting.invoker.call.CallType;
-import com.wugui.datax.rpc.remoting.invoker.call.AbstractXxlRpcInvokeCallback;
+import com.wugui.datax.rpc.remoting.invoker.call.XxlRpcInvokeCallback;
 import com.wugui.datax.rpc.remoting.invoker.call.XxlRpcInvokeFuture;
 import com.wugui.datax.rpc.remoting.invoker.generic.XxlRpcGenericService;
 import com.wugui.datax.rpc.remoting.invoker.route.LoadBalance;
-import com.wugui.datax.rpc.remoting.net.AbstractClient;
+import com.wugui.datax.rpc.remoting.net.Client;
 import com.wugui.datax.rpc.remoting.net.impl.netty.client.NettyClient;
 import com.wugui.datax.rpc.remoting.net.params.XxlRpcFutureResponse;
 import com.wugui.datax.rpc.remoting.net.params.XxlRpcRequest;
 import com.wugui.datax.rpc.remoting.net.params.XxlRpcResponse;
 import com.wugui.datax.rpc.remoting.provider.XxlRpcProviderFactory;
-import com.wugui.datax.rpc.serialize.AbstractSerializer;
+import com.wugui.datax.rpc.serialize.Serializer;
 import com.wugui.datax.rpc.serialize.impl.HessianSerializer;
 import com.wugui.datax.rpc.util.ClassUtil;
 import com.wugui.datax.rpc.util.XxlRpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -36,8 +38,8 @@ public class XxlRpcReferenceBean {
 
     // ---------------------- config ----------------------
 
-    private Class<? extends AbstractClient> client = NettyClient.class;
-    private Class<? extends AbstractSerializer> serializer = HessianSerializer.class;
+    private Class<? extends Client> client = NettyClient.class;
+    private Class<? extends Serializer> serializer = HessianSerializer.class;
     private CallType callType = CallType.SYNC;
     private LoadBalance loadBalance = LoadBalance.ROUND;
 
@@ -49,17 +51,17 @@ public class XxlRpcReferenceBean {
     private String address = null;
     private String accessToken = null;
 
-    private AbstractXxlRpcInvokeCallback invokeCallback = null;
+    private XxlRpcInvokeCallback invokeCallback = null;
 
     private XxlRpcInvokerFactory invokerFactory = null;
 
 
     // set
-    public void setClient(Class<? extends AbstractClient> client) {
+    public void setClient(Class<? extends Client> client) {
         this.client = client;
     }
 
-    public void setSerializer(Class<? extends AbstractSerializer> serializer) {
+    public void setSerializer(Class<? extends Serializer> serializer) {
         this.serializer = serializer;
     }
 
@@ -91,7 +93,7 @@ public class XxlRpcReferenceBean {
         this.accessToken = accessToken;
     }
 
-    public void setInvokeCallback(AbstractXxlRpcInvokeCallback invokeCallback) {
+    public void setInvokeCallback(XxlRpcInvokeCallback invokeCallback) {
         this.invokeCallback = invokeCallback;
     }
 
@@ -101,7 +103,7 @@ public class XxlRpcReferenceBean {
 
 
     // get
-    public AbstractSerializer getSerializerInstance() {
+    public Serializer getSerializerInstance() {
         return serializerInstance;
     }
 
@@ -120,8 +122,8 @@ public class XxlRpcReferenceBean {
 
     // ---------------------- initClient ----------------------
 
-    private AbstractClient clientInstance = null;
-    private AbstractSerializer serializerInstance = null;
+    private Client clientInstance = null;
+    private Serializer serializerInstance = null;
 
     public XxlRpcReferenceBean initClient() throws Exception {
 
@@ -167,32 +169,33 @@ public class XxlRpcReferenceBean {
         initClient();
 
         // newProxyInstance
-        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{iface},
+        return Proxy.newProxyInstance(Thread.currentThread()
+                        .getContextClassLoader(), new Class[]{iface},
                 (proxy, method, args) -> {
+
                     // method param
-                    String className = method.getDeclaringClass().getName();
-                    String versionInit = version;
+                    String className = method.getDeclaringClass().getName();    // iface.getName()
+                    String varsion_ = version;
                     String methodName = method.getName();
                     Class<?>[] parameterTypes = method.getParameterTypes();
                     Object[] parameters = args;
 
                     // filter for generic
-                    String invoke = "invoke";
-                    if (className.equals(XxlRpcGenericService.class.getName()) && invoke.equals(methodName)) {
+                    if (className.equals(XxlRpcGenericService.class.getName()) && methodName.equals("invoke")) {
 
                         Class<?>[] paramTypes = null;
-                        int location = 3;
-                        if (args[location] != null) {
-                            String[] paramTypesStr = (String[]) args[location];
-                            if (paramTypesStr.length > 0) {
-                                paramTypes = new Class[paramTypesStr.length];
-                                for (int i = 0; i < paramTypesStr.length; i++) {
-                                    paramTypes[i] = ClassUtil.resolveClass(paramTypesStr[i]);
+                        if (args[3] != null) {
+                            String[] paramTypes_str = (String[]) args[3];
+                            if (paramTypes_str.length > 0) {
+                                paramTypes = new Class[paramTypes_str.length];
+                                for (int i = 0; i < paramTypes_str.length; i++) {
+                                    paramTypes[i] = ClassUtil.resolveClass(paramTypes_str[i]);
                                 }
                             }
                         }
+
                         className = (String) args[0];
-                        versionInit = (String) args[1];
+                        varsion_ = (String) args[1];
                         methodName = (String) args[2];
                         parameterTypes = paramTypes;
                         parameters = (Object[]) args[4];
@@ -209,7 +212,7 @@ public class XxlRpcReferenceBean {
                     if (finalAddress == null || finalAddress.trim().length() == 0) {
                         if (invokerFactory != null && invokerFactory.getServiceRegistry() != null) {
                             // discovery
-                            String serviceKey = XxlRpcProviderFactory.makeServiceKey(className, versionInit);
+                            String serviceKey = XxlRpcProviderFactory.makeServiceKey(className, varsion_);
                             TreeSet<String> addressSet = invokerFactory.getServiceRegistry().discovery(serviceKey);
                             // load balance
                             if (addressSet == null || addressSet.size() == 0) {
@@ -267,7 +270,7 @@ public class XxlRpcReferenceBean {
                             XxlRpcInvokeFuture invokeFuture = new XxlRpcInvokeFuture(futureResponse);
                             XxlRpcInvokeFuture.setFuture(invokeFuture);
 
-                            // do invoke
+// do invoke
                             clientInstance.asyncSend(finalAddress, xxlRpcRequest);
 
                             return null;
@@ -283,8 +286,8 @@ public class XxlRpcReferenceBean {
                     } else if (CallType.CALLBACK == callType) {
 
                         // get callback
-                        AbstractXxlRpcInvokeCallback finalInvokeCallback = invokeCallback;
-                        AbstractXxlRpcInvokeCallback threadInvokeCallback = AbstractXxlRpcInvokeCallback.getCallback();
+                        XxlRpcInvokeCallback finalInvokeCallback = invokeCallback;
+                        XxlRpcInvokeCallback threadInvokeCallback = XxlRpcInvokeCallback.getCallback();
                         if (threadInvokeCallback != null) {
                             finalInvokeCallback = threadInvokeCallback;
                         }

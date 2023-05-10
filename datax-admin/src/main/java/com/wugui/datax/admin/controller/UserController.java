@@ -19,7 +19,7 @@ import java.util.Map;
 import static com.wugui.datatx.core.biz.model.ReturnT.FAIL_CODE;
 
 /**
- * @author by jingwk on 2019/11/17
+ * Created by jingwk on 2019/11/17
  */
 @RestController
 @RequestMapping("/api/user")

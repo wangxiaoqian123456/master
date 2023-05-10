@@ -1,15 +1,12 @@
 package com.wugui.datax.admin.tool.query;
 
-import com.alibaba.druid.util.JdbcConstants;
-import com.wugui.datatx.core.enums.DbType;
 import com.wugui.datax.admin.entity.JobDatasource;
+import com.wugui.datax.admin.util.JdbcConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
-
-import static com.wugui.datax.admin.tool.query.DriverConnectionFactory.buildParameter;
 
 @Slf4j
 public class Hbase20xsqlQueryToolTest {
@@ -20,15 +17,15 @@ public class Hbase20xsqlQueryToolTest {
     @Before
     public void before() {
         genMysqlDemo();
-        queryTool = QueryToolFactory.getByDbType(jdbcDatasource.getType(),jdbcDatasource.getConnectionParams());
+        queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
     }
 
     private void genMysqlDemo() {
         jdbcDatasource = new JobDatasource();
-        String parameter = buildParameter("", "", DbType.HBASE20XSQL, null, "jdbc:phoenix:hadoop1,hadoop2,hadoop3:2181", null, null);
-        jdbcDatasource.setConnectionParams(parameter);
-        jdbcDatasource.setDatasourceName(DbType.HBASE20XSQL.getDescp());
-
+        jdbcDatasource.setDatasource(JdbcConstants.HBASE20XSQL);
+        jdbcDatasource.setDatasourceName(JdbcConstants.HBASE20XSQL);
+        jdbcDatasource.setJdbcDriverClass(JdbcConstants.HBASE20XSQL_DRIVER);
+        jdbcDatasource.setJdbcUrl("jdbc:phoenix:hadoop1,hadoop2,hadoop3:2181");
     }
 
     @Test
@@ -41,7 +38,7 @@ public class Hbase20xsqlQueryToolTest {
 
     @Test
     public void getColumnNames() {
-        List<String> columns = queryTool.getColumnNames("STOCK_SYMBOL", null, null);
+        List<String> columns = queryTool.getColumnNames("STOCK_SYMBOL", null);
 
         for (String column : columns) {
             System.out.println(column);
